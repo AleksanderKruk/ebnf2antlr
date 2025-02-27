@@ -1,18 +1,12 @@
 package com.github.akruk.ebnf2antlr;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-/**
- * Unit test for simple App.
- */
-class AppTest {
-    /**
-     * Rigorous Test.
-     */
+public class AppTest {
     @Test
-    void testApp() {
+    public void testApp() {
         assertEquals(1, 1);
     }
 }
