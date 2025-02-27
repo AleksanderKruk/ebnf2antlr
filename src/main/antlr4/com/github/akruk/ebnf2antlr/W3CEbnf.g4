@@ -1,12 +1,12 @@
 grammar W3CEbnf;
-ebnf: rule+ EOF;
-rule: (LBRACKET NUMBERS RBRACKET)? NAME ASSIGNMENT expr;
-expr:
-    expr (OR_OP expr)+
-    | expr expr
-    | expr MINUS expr
-    | expr (STAR | PLUS | QMARK)
-    | LPAREN expr RPAREN
+ebnf: grammarProduct+ EOF;
+grammarProduct: (LBRACKET NUMBERS RBRACKET)? NAME ASSIGNMENT sequence;
+sequence:
+    sequence (OR_OP sequence)+
+    | sequence sequence
+    | sequence MINUS sequence
+    | sequence (STAR | PLUS | QMARK)
+    | LPAREN sequence RPAREN
     | NAME
     | TERMINAL
     | LITERAL;
