@@ -28,12 +28,15 @@ public final class EBNF2ANTLRConverter {
                 // ::= -> :
                 text = text.replaceFirst("\s*::=\s*", ": ");
                 // ;
-                text = text.replaceFirst("\s*$", ";")
+                text = text.replaceFirst("\s*$", ";");
+                // "..." -> '...'
+                // Regex: (?!\')" -> an unescaped double quotation mark
+                text = text.replaceAll("(?!\\\\')\"", "'");
                 System.out.println(text);
             }
 
-        } catch (IOException e) {
-            System.err.println("File could not be parsed: " + convertedFilename);
+        } catch (IOException e) { // Granularize
+            System.err.println("Error while opening the file: " + convertedFilename);
         }
         System.out.println("Hello World!");
     }
