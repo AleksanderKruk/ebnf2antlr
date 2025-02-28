@@ -1,6 +1,10 @@
 package com.github.akruk.ebnf2antlr;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.xpath.XPath;
@@ -11,13 +15,35 @@ public final class EBNF2ANTLRConverter {
     private EBNF2ANTLRConverter() {
     }
 
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.err.println("Incorrect number of arguments: " + args.length + " != 1");
+    private static void help() {
+        System.err.println("Expected arguments: [--output <output-path>] <file-to-be-converted-path>");
+    }
+
+    record Args(Path fileToBeConvertedPath, Path outputPath) {}
+    private static Args parseArgs(String[] args) {
+        final var argcount = args.length;
+        Path outputPath = null;
+        Path convertedPath = null;
+        if (argcount == 1) {
+            convertedPath = Path.of(args[0]);
         }
-        String convertedFilename = args[0];
+        if (argcount == 3 && "--output".equals(args[0])) {
+            outputPath = Path.of(args[1]);
+            convertedPath = Path.of(args[2]);
+        }
+        return new Args(outputPath, convertedPath);
+    }
+
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            help();
+        }
+        Args parsedArgs = parseArgs(args);
+        Path fileToBeConverted = parsedArgs.fileToBeConvertedPath;
+        Path outputPath = parsedArgs.outputPath;
         try {
-            CharStream charStream = CharStreams.fromFileName(convertedFilename);
+            Writer outputWriter = outputPath != null? Files.newBufferedWriter(outputPath): new OutputStreamWriter(System.out);
+            CharStream charStream = CharStreams.fromPath(fileToBeConverted);
             W3CEbnfLexer ebnfLexer = new W3CEbnfLexer(charStream);
             CommonTokenStream tokenStream = new CommonTokenStream(ebnfLexer);
             W3CEbnfParser ebnfParser = new W3CEbnfParser(tokenStream);
@@ -32,11 +58,11 @@ public final class EBNF2ANTLRConverter {
                 // "..." -> '...'
                 // Regex: (?!\')" -> an unescaped double quotation mark
                 text = text.replaceAll("(?!\\\\')\"", "'");
-                System.out.println(text);
+                outputWriter.write(text + "\n");
             }
 
-        } catch (IOException e) { // Granularize
-            System.err.println("Error while opening the file: " + convertedFilename);
+        } catch (IOException e) { // TODO: Granularize
+            System.err.println("Error while opening file: " + outputPath.toAbsolutePath());
         }
         System.out.println("Hello World!");
     }
