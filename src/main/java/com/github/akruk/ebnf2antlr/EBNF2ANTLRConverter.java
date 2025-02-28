@@ -26,9 +26,10 @@ public final class EBNF2ANTLRConverter {
             for (var product : products) {
                 var text = product.getText();
                 // ::= -> :
-                text.replaceFirst("\s*::=\s*", ": ");
-                //
-                System.out.println(text + ";");
+                text = text.replaceFirst("\s*::=\s*", ": ");
+                // ;
+                text = text.replaceFirst("\s*$", ";")
+                System.out.println(text);
             }
 
         } catch (IOException e) {
