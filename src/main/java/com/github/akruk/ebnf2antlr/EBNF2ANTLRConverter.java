@@ -42,12 +42,17 @@ public final class EBNF2ANTLRConverter {
         Path fileToBeConverted = parsedArgs.fileToBeConvertedPath;
         Path outputPath = parsedArgs.outputPath;
         try {
-            Writer outputWriter = outputPath != null? Files.newBufferedWriter(outputPath): new OutputStreamWriter(System.out);
+            boolean writeToFile = outputPath != null;
+            Writer outputWriter = writeToFile? Files.newBufferedWriter(outputPath): new OutputStreamWriter(System.out);
             CharStream charStream = CharStreams.fromPath(fileToBeConverted);
             W3CEbnfLexer ebnfLexer = new W3CEbnfLexer(charStream);
             CommonTokenStream tokenStream = new CommonTokenStream(ebnfLexer);
             W3CEbnfParser ebnfParser = new W3CEbnfParser(tokenStream);
             EbnfContext tree = ebnfParser.ebnf();
+            Path namePath = writeToFile ? outputPath : fileToBeConverted;
+            // TODO: add cli option --grammar-name
+            String grammarName = namePath.getFileName().toString().replaceFirst("\\..+?$", "");
+            outputWriter.write(String.format("grammar %s;\n", grammarName));
             var products = XPath.findAll(tree, "//grammarProduct", ebnfParser);
             for (var product : products) {
                 var text = product.getText();
@@ -57,12 +62,13 @@ public final class EBNF2ANTLRConverter {
                 text = text.replaceFirst("\s*::=\s*", ": ");
                 // ;
                 text = text.trim() + ";";
-                // "..." -> '...'
+                // "literal" -> 'literal'
                 // Regex: (?!\')" -> an unescaped double quotation mark
                 text = text.replaceAll("(?!\\\\')\"", "'");
                 outputWriter.write(text + "\n");
             }
             outputWriter.flush();
+
         } catch (IOException e) { // TODO: Granularize
             System.err.println("Error while opening file: " + outputPath.toAbsolutePath());
         }
