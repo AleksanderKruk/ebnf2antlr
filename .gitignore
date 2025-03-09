@@ -1,3 +1,4 @@
 target
 .antlr
 dependency-reduced-pom.xml
+.vscode

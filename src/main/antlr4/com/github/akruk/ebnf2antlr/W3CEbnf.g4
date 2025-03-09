@@ -29,8 +29,8 @@ LBRACKET: '[';
 RBRACKET: ']';
 LPAREN: '(';
 RPAREN: ')';
-WS: [ \t]+ -> skip;
-NL: [\n\r]+ -> skip;
-COMMENT: '/*' .*? '*/' -> skip;
+WS: [ \t]+ -> channel(HIDDEN);
+NL: [\n\r]+ -> channel(HIDDEN);
+COMMENT: '/*' .*? '*/' -> channel(HIDDEN);
 
 OTHER: .;

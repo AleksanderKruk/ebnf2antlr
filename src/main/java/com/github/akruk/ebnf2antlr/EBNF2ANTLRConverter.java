@@ -31,7 +31,7 @@ public final class EBNF2ANTLRConverter {
             outputPath = Path.of(args[1]);
             convertedPath = Path.of(args[2]);
         }
-        return new Args(outputPath, convertedPath);
+        return new Args(convertedPath, outputPath);
     }
 
     public static void main(String[] args) {
@@ -48,22 +48,23 @@ public final class EBNF2ANTLRConverter {
             CommonTokenStream tokenStream = new CommonTokenStream(ebnfLexer);
             W3CEbnfParser ebnfParser = new W3CEbnfParser(tokenStream);
             EbnfContext tree = ebnfParser.ebnf();
-            var products = XPath.findAll(tree, "/grammarProduct", ebnfParser);
+            var products = XPath.findAll(tree, "//grammarProduct", ebnfParser);
             for (var product : products) {
                 var text = product.getText();
+                // removal of rule numbering: '[1...]'
+                text = text.replaceFirst("\\[\\d+\\]", "");
                 // ::= -> :
                 text = text.replaceFirst("\s*::=\s*", ": ");
                 // ;
-                text = text.replaceFirst("\s*$", ";");
+                text = text.trim() + ";";
                 // "..." -> '...'
                 // Regex: (?!\')" -> an unescaped double quotation mark
                 text = text.replaceAll("(?!\\\\')\"", "'");
                 outputWriter.write(text + "\n");
             }
-
+            outputWriter.flush();
         } catch (IOException e) { // TODO: Granularize
             System.err.println("Error while opening file: " + outputPath.toAbsolutePath());
         }
-        System.out.println("Hello World!");
     }
 }
